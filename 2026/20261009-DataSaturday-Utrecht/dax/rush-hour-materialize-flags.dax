@@ -1,0 +1,52 @@
+﻿// derive rush hour and weekday from fact columns in DAX
+DEFINE
+    MEASURE 'Yellow Taxi'[Weekday Rush Trips] =
+        CALCULATE (
+            COUNTROWS ( 'Yellow Taxi' ),
+            FILTER (
+                'Yellow Taxi',
+                HOUR ( 'Yellow Taxi'[Pickup Time] )
+                    IN { 7, 8, 9, 16, 17, 18 } && WEEKDAY ( 'Yellow Taxi'[Pickup Date], 2 ) <= 5
+            )
+        )
+EVALUATE
+SUMMARIZECOLUMNS (
+    'Date'[Date],
+    TREATAS ( { "2024-03" }, 'Date'[Year Month] ),
+    "Weekday Rush Trips", [Weekday Rush Trips]
+)
+ORDER BY 'Date'[Date]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Technique: materialize flags, let relationships and SE deal with it.
+DEFINE
+    MEASURE 'Yellow Taxi'[Weekday Rush Trips] =
+        CALCULATE (
+            COUNTROWS ( 'Yellow Taxi' ),
+            KEEPFILTERS ( 'Time'[Is Rush Hour] = TRUE () ),
+            KEEPFILTERS ( 'Date'[Is Weekend] = FALSE () )
+        )
+
+EVALUATE
+SUMMARIZECOLUMNS (
+    'Date'[Date],
+    TREATAS ( { "2024-03" }, 'Date'[Year Month] ),
+    "Weekday Rush Trips", [Weekday Rush Trips]
+)
+ORDER BY 'Date'[Date]

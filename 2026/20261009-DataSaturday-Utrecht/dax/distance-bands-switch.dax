@@ -1,0 +1,81 @@
+﻿// compute each trip's band with SWITCH, then match it to the band
+DEFINE
+    VAR Bands =
+        DATATABLE (
+            "Band", STRING,
+            "Low", DOUBLE,
+            "High", DOUBLE,
+            {
+                { "Under 1 mi", -1000000000, 1 },
+                { "1-3 mi", 1, 3 },
+                { "3-10 mi", 3, 10 },
+                { "10+ mi", 10, 1000000000 }
+            }
+        )
+EVALUATE
+CALCULATETABLE (
+    ADDCOLUMNS (
+        Bands,
+        "Trips",
+            VAR ThisBand = [Band]
+            RETURN
+                COUNTROWS (
+                    FILTER (
+                        'Yellow Taxi',
+                        SWITCH (
+                            TRUE (),
+                            'Yellow Taxi'[M_TripDistance] < 1, "Under 1 mi",
+                            'Yellow Taxi'[M_TripDistance] < 3, "1-3 mi",
+                            'Yellow Taxi'[M_TripDistance] < 10, "3-10 mi",
+                            "10+ mi"
+                        ) = ThisBand
+                    )
+                )
+    ),
+    'Date'[Year Month] = "2024-03"
+)
+ORDER BY [Low]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Technique: convert to filter predicates in a CALCULATE
+DEFINE
+    VAR Bands =
+        DATATABLE (
+            "Band", STRING,
+            "Low", DOUBLE,
+            "High", DOUBLE,
+            {
+                { "Under 1 mi", -1000000000, 1 },
+                { "1-3 mi", 1, 3 },
+                { "3-10 mi", 3, 10 },
+                { "10+ mi", 10, 1000000000 }
+            }
+        )
+EVALUATE
+CALCULATETABLE(
+    ADDCOLUMNS (
+        Bands,
+        "Trips",
+            VAR Lo = [Low]
+            VAR Hi = [High]
+            RETURN
+                CALCULATE (
+                    COUNTROWS ( 'Yellow Taxi' ),
+                    'Yellow Taxi'[M_TripDistance] >= Lo && 'Yellow Taxi'[M_TripDistance] < Hi
+                )
+    ),
+    'Date'[Year Month] = "2024-03"
+)
+ORDER BY [Low]

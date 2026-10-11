@@ -1,0 +1,63 @@
+﻿// Counts fact rows by evaluating the measure once per row 
+// (context transition on every trip)
+DEFINE
+    MEASURE 'Yellow Taxi'[Long Trips] =
+        CALCULATE(
+            COUNTROWS ( 'Yellow Taxi' ),
+            KEEPFILTERS('Rate Code'[Rate Code Description] = "Standard rate"),
+            KEEPFILTERS('Yellow Taxi'[M_TripDistance] >= 10)
+        )
+    MEASURE 'Yellow Taxi'[Long Trip Fares] =
+        CALCULATE(
+        	[Fare Amount],
+            FILTER(
+                'Yellow Taxi',
+                NOT ISBLANK([Long Trips])
+            )
+        )
+EVALUATE
+SUMMARIZECOLUMNS(
+    'Time'[Hour],
+    TREATAS({DATE(2024, 3, 15)}, 'Date'[Date]),
+    "Long Trips", [Long Trips],
+    "Long Trip Fares", [Long Trip Fares]
+)
+ORDER BY 'Time'[Hour]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Technique: use filter predicates, rather than filtering on a measure
+DEFINE
+    MEASURE 'Yellow Taxi'[Long trips] =
+        CALCULATE(
+            COUNTROWS ( 'Yellow Taxi' ),
+            KEEPFILTERS('Rate Code'[Rate Code Description] = "Standard rate"),
+            KEEPFILTERS('Yellow Taxi'[M_TripDistance] >= 10)
+        )
+    MEASURE 'Yellow Taxi'[Long trip fares] =
+        CALCULATE(
+            [Fare Amount],
+            KEEPFILTERS('Rate Code'[Rate Code Description] = "Standard rate"),
+            KEEPFILTERS('Yellow Taxi'[M_TripDistance] >= 10)
+        )
+EVALUATE
+SUMMARIZECOLUMNS(
+    'Time'[Hour],
+    TREATAS({DATE(2024, 3, 15)}, 'Date'[Date]),
+    "Long Trips", [Long Trips],
+    "Long Trip fares", [Long trip fares]
+)
+ORDER BY 'Time'[Hour]

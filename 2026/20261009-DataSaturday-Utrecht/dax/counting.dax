@@ -1,0 +1,26 @@
+﻿// Counting with an iterator: IF is evaluated per row of 'Yellow Taxi'
+EVALUATE
+SUMMARIZECOLUMNS (
+    'Date'[Year Month],
+    TREATAS ( { 2024 }, 'Date'[Year] ),
+    "Tipped Trips", SUMX ( 'Yellow Taxi', IF ( 'Yellow Taxi'[M_TipAmount] > 0, 1 ) )
+)
+ORDER BY 'Date'[Year Month]
+
+
+
+
+
+
+
+
+
+
+// Technique: pull conditionals out to filter context.
+EVALUATE
+SUMMARIZECOLUMNS (
+    'Date'[Year Month],
+    TREATAS ( { 2024 }, 'Date'[Year] ),
+    "Tipped Trips", CALCULATE ( COUNTROWS ( 'Yellow Taxi' ), 'Yellow Taxi'[M_TipAmount] > 0 )
+)
+ORDER BY 'Date'[Year Month]

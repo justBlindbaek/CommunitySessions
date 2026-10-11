@@ -1,0 +1,11 @@
+﻿DEFINE
+MEASURE 'Date'[Row count] = COUNTROWS('Yellow Taxi')
+EVALUATE
+SUMMARIZECOLUMNS(
+    'Date'[Year],
+    "Passenger Count", [Passenger Count],
+    "Total Amount", [Total Amount],
+    "Row Count", [Row count]
+)
+ORDER BY 
+    'Date'[Year] ASC

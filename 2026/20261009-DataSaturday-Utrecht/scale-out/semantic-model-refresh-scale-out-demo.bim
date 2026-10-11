@@ -1,0 +1,45 @@
+{
+  "name": "ScaleOut",
+  "compatibilityLevel": 1702,
+  "model": {
+    "name": "ScaleOut",
+    "culture": "en-US",
+    "defaultPowerBIDataSourceVersion": "powerBI_V3",
+    "tables": [
+      {
+        "name": "RefreshInfo",
+        "description": "One row with the time of the last refresh. Show it in a report to see which data the report is served from.",
+        "columns": [
+          {
+            "name": "RefreshTime",
+            "dataType": "dateTime",
+            "sourceColumn": "RefreshTime",
+            "formatString": "dd-mm-yyyy hh:nn:ss",
+            "description": "Time of the last refresh, in UTC."
+          }
+        ],
+        "partitions": [
+          {
+            "name": "RefreshInfo",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    // No data source: the table is created inline, so the model refreshes without credentials.",
+                "    // The Power BI service runs in UTC. To show local time, change UtcNow() to e.g.",
+                "    // DateTimeZone.SwitchZone(DateTimeZone.UtcNow(), 2)",
+                "    Source = #table(",
+                "        type table [RefreshTime = datetime],",
+                "        {{ DateTimeZone.RemoveZone(DateTimeZone.UtcNow()) }}",
+                "    )",
+                "in",
+                "    Source"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
